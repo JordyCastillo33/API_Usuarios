@@ -50,12 +50,12 @@ router.post('/new', async (req, res) => {
     const {type = '', description = '', amount='',category = ''} = req.body;
     if (/^\s*$/.test(description)) {
       return res.status(400).json({
-        error: 'Se espera valor de categoría'
+        error: 'Se espera valor de descripcion'
       });
     }
     if (!(/^(INCOME)|(EXPENSES)$/.test(type))) {
       return res.status(400).json({
-        error: 'Se espera valor de type en INCOME o EXPENSE'
+        error: 'Se espera valor de type en INCOME o EXPENSES'
       });
     }
     const newBitacora = await bita.addBitacora({type,description,amount,category});
@@ -80,14 +80,14 @@ router.put('/update/:codigo', async (req, res)=>{
     }
     if (!(/^(INCOME)|(EXPENSES)$/.test(type))) {
       return res.status(400).json({
-        error: 'Se espera valor de type en INCOME o EXPENSE'
+        error: 'Se espera valor de type en INCOME o EXPENSES'
       });
     }
 
     const updateResult = await bita.updateBitacoras({type,description,amount,category,codigo:parseInt(codigo),});
 
     if (!updateResult) {
-      return res.status(404).json({error:'Categoria no encontrada.'});
+      return res.status(404).json({error:'bitacora no encontrada.'});
     }
     return res.status(200).json({updatedCategory:updateResult});
 
@@ -118,28 +118,5 @@ router.delete('/delete/:codigo', async (req, res) => {
   }
 });
 
-/*
-router.put('/getCategoryById/:codigo', async (req, res)=>{
-  try {
-    const {codigo} = req.params;
-    if(!(/^\d+$/.test(codigo))) {
-      return res.status(400).json({error:'El codigo debe ser un dígito válido.'});
-    }
-
-
-    const categories = await getCategoryById({codigo:parseInt(codigo)});
-    
-
-    if (!categories) {
-      return res.status(404).json({error:'Categoria no encontrada.'});
-    }
-    return res.status(200).json(categories);
-
-  } catch(ex) {
-    console.error(ex);
-    res.status(500).json({error: 'Error al procesar solicitud.'});
-  }
-});
-*/
 
 module.exports = router;
