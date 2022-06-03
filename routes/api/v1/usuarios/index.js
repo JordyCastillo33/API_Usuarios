@@ -1,28 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const Category = require('../../../../libs/categorias');
-const CategoryDao = require('../../../../dao/models/CategoryDao');
-const catDao = new CategoryDao();
-const cat = new Category(catDao);
-cat.init();
+const Usuario = require('../../../../libs/usuarios');
+const UsuarioDao = require('../../../../dao/models/UsuarioDao');
+const userDao = new UsuarioDao();
+const user = new Usuario(userDao);
+user.init();
 
 router.get('/', async (req, res) => {
   // extraer y validar datos del request
   try {
     // devolver la ejecución el controlador de esta ruta
-    const versionData = await cat.getCategoryVersion();
+    const versionData = await user.getUserVersion();
     return res.status(200).json(versionData);
   } catch ( ex ) {
     // manejar el error que pueda tirar el controlador
-    console.error('Error Category', ex);
+    console.error('Error User', ex);
     return res.status(502).json({'error': 'Error Interno de Server'});
   }
 }); // get /
 
 router.get('/all', async (req, res) => {
   try {
-    const categories = await cat.getCategories();
-    return res.status(200).json(categories);
+    const usuarios = await user.getUsuarios();
+    return res.status(200).json(usuarios);
   } catch (ex) {
     console.error(ex);
     return res.status(501).json({error:'Error al procesar solicitud.'});
@@ -37,7 +37,7 @@ router.get('/byid/:codigo', async (req, res) => {
         error: 'Se espera un codigo numérico'
       });
     }
-    const registro = await cat.getCategoryById({codigo: parseInt(codigo)});
+    const registro = await user.getUsuarioById({codigo: parseInt(codigo)});
     return res.status(200).json(registro);
   } catch (ex) {
     console.error(ex);
@@ -47,10 +47,10 @@ router.get('/byid/:codigo', async (req, res) => {
 
 router.post('/new', async (req, res) => {
   try {
-    const {categoria = '', estado=''} = req.body;
-    if (/^\s*$/.test(categoria)) {
+    const {email = '',password = '',nombre = '',avatar = '',estado = ''} = req.body;
+    if (/^\s*$/.test(nombre)) {
       return res.status(400).json({
-        error: 'Se espera valor de categoría'
+        error: 'Se espera valor de nombre'
       });
     }
     if (!(/^(ACT)|(INA)$/.test(estado))) {
@@ -58,8 +58,12 @@ router.post('/new', async (req, res) => {
         error: 'Se espera valor de estado en ACT o INA'
       });
     }
-    const newCategory = await cat.addCategory({categoria, estado});
-    return res.status(200).json(newCategory);
+    const newUsuario = await user.addUsuarios({email,
+        nombre,
+        avatar,
+        password,
+        estado});
+    return res.status(200).json(newUsuario);
   } catch(ex){
     console.error(ex);
     return res.status(502).json({error:'Error al procesar solicitud'});
@@ -72,10 +76,10 @@ router.put('/update/:codigo', async (req, res)=>{
     if(!(/^\d+$/.test(codigo))) {
       return res.status(400).json({error:'El codigo debe ser un dígito válido.'});
     }
-    const {categoria, estado} = req.body;
-    if (/^\s*$/.test(categoria)) {
+    const {email = '',password = '',nombre = '',avatar = '',estado = ''} = req.body;
+    if (/^\s*$/.test(nombre)) {
       return res.status(400).json({
-        error: 'Se espera valor de categoría'
+        error: 'Se espera valor de nombre'
       });
     }
     if (!(/^(ACT)|(INA)$/.test(estado))) {
@@ -84,12 +88,17 @@ router.put('/update/:codigo', async (req, res)=>{
       });
     }
 
-    const updateResult = await cat.updateCategory({codigo:parseInt(codigo), categoria, estado});
+    const updateResult = await user.updateUsuarios({
+        email,
+        nombre,
+        avatar,
+        password,
+        estado,codigo:parseInt(codigo)});
 
     if (!updateResult) {
-      return res.status(404).json({error:'Categoria no encontrada.'});
+      return res.status(404).json({error:'Usuario no encontrado.'});
     }
-    return res.status(200).json({updatedCategory:updateResult});
+    return res.status(200).json({updateUsuarios:updateResult});
 
   } catch(ex) {
     console.error(ex);
@@ -105,10 +114,10 @@ router.delete('/delete/:codigo', async (req, res) => {
       return res.status(400).json({ error: 'El codigo debe ser un dígito válido.' });
     }
 
-    const deletedCategory = await cat.deleteCategory({ codigo: parseInt(codigo)});
+    const deletedCategory = await user.deleteUsuario({ codigo: parseInt(codigo)});
 
     if (!deletedCategory) {
-      return res.status(404).json({ error: 'Categoria no encontrada.' });
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
     return res.status(200).json({ deletedCategory});
 
@@ -118,8 +127,7 @@ router.delete('/delete/:codigo', async (req, res) => {
   }
 });
 
-/*
-router.put('/getCategoryById/:codigo', async (req, res)=>{
+router.put('/getUsuarioById/:codigo', async (req, res)=>{
   try {
     const {codigo} = req.params;
     if(!(/^\d+$/.test(codigo))) {
@@ -127,7 +135,7 @@ router.put('/getCategoryById/:codigo', async (req, res)=>{
     }
 
 
-    const categories = await getCategoryById({codigo:parseInt(codigo)});
+    const categories = await getUsuarioById({codigo:parseInt(codigo)});
     
 
     if (!categories) {
@@ -140,6 +148,5 @@ router.put('/getCategoryById/:codigo', async (req, res)=>{
     res.status(500).json({error: 'Error al procesar solicitud.'});
   }
 });
-*/
 
 module.exports = router;

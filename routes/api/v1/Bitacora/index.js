@@ -1,28 +1,28 @@
 const express = require('express');
 const router = express.Router();
-const Category = require('../../../../libs/categorias');
-const CategoryDao = require('../../../../dao/models/CategoryDao');
-const catDao = new CategoryDao();
-const cat = new Category(catDao);
-cat.init();
+const Bitacora = require('../../../../libs/Bitacora');
+const BitacoraDao = require('../../../../dao/models/BitacoraDao');
+const bitaDao = new BitacoraDao();
+const bita = new Bitacora(bitaDao);
+bita.init();
 
 router.get('/', async (req, res) => {
   // extraer y validar datos del request
   try {
     // devolver la ejecución el controlador de esta ruta
-    const versionData = await cat.getCategoryVersion();
+    const versionData = await bita.getBitacoraVersion();
     return res.status(200).json(versionData);
   } catch ( ex ) {
     // manejar el error que pueda tirar el controlador
-    console.error('Error Category', ex);
+    console.error('Error Bitacora', ex);
     return res.status(502).json({'error': 'Error Interno de Server'});
   }
 }); // get /
 
 router.get('/all', async (req, res) => {
   try {
-    const categories = await cat.getCategories();
-    return res.status(200).json(categories);
+    const bitacora = await bita.getBitacoras();
+    return res.status(200).json(bitacora);
   } catch (ex) {
     console.error(ex);
     return res.status(501).json({error:'Error al procesar solicitud.'});
@@ -37,7 +37,7 @@ router.get('/byid/:codigo', async (req, res) => {
         error: 'Se espera un codigo numérico'
       });
     }
-    const registro = await cat.getCategoryById({codigo: parseInt(codigo)});
+    const registro = await bita.getBitacoraById({codigo: parseInt(codigo)});
     return res.status(200).json(registro);
   } catch (ex) {
     console.error(ex);
@@ -47,19 +47,19 @@ router.get('/byid/:codigo', async (req, res) => {
 
 router.post('/new', async (req, res) => {
   try {
-    const {categoria = '', estado=''} = req.body;
-    if (/^\s*$/.test(categoria)) {
+    const {type = '', description = '', amount='',category = ''} = req.body;
+    if (/^\s*$/.test(description)) {
       return res.status(400).json({
         error: 'Se espera valor de categoría'
       });
     }
-    if (!(/^(ACT)|(INA)$/.test(estado))) {
+    if (!(/^(INCOME)|(EXPENSES)$/.test(type))) {
       return res.status(400).json({
-        error: 'Se espera valor de estado en ACT o INA'
+        error: 'Se espera valor de type en INCOME o EXPENSE'
       });
     }
-    const newCategory = await cat.addCategory({categoria, estado});
-    return res.status(200).json(newCategory);
+    const newBitacora = await bita.addBitacora({type,description,amount,category});
+    return res.status(200).json(newBitacora);
   } catch(ex){
     console.error(ex);
     return res.status(502).json({error:'Error al procesar solicitud'});
@@ -72,19 +72,19 @@ router.put('/update/:codigo', async (req, res)=>{
     if(!(/^\d+$/.test(codigo))) {
       return res.status(400).json({error:'El codigo debe ser un dígito válido.'});
     }
-    const {categoria, estado} = req.body;
-    if (/^\s*$/.test(categoria)) {
+    const {type = '', description = '', amount='',category = ''} = req.body;
+    if (/^\s*$/.test(description)) {
       return res.status(400).json({
-        error: 'Se espera valor de categoría'
+        error: 'Se espera valor de descripcion'
       });
     }
-    if (!(/^(ACT)|(INA)$/.test(estado))) {
+    if (!(/^(INCOME)|(EXPENSES)$/.test(type))) {
       return res.status(400).json({
-        error: 'Se espera valor de estado en ACT o INA'
+        error: 'Se espera valor de type en INCOME o EXPENSE'
       });
     }
 
-    const updateResult = await cat.updateCategory({codigo:parseInt(codigo), categoria, estado});
+    const updateResult = await bita.updateBitacoras({type,description,amount,category,codigo:parseInt(codigo),});
 
     if (!updateResult) {
       return res.status(404).json({error:'Categoria no encontrada.'});
@@ -105,12 +105,12 @@ router.delete('/delete/:codigo', async (req, res) => {
       return res.status(400).json({ error: 'El codigo debe ser un dígito válido.' });
     }
 
-    const deletedCategory = await cat.deleteCategory({ codigo: parseInt(codigo)});
+    const deletedBitacora = await bita.deleteBitacora({ codigo: parseInt(codigo)});
 
-    if (!deletedCategory) {
-      return res.status(404).json({ error: 'Categoria no encontrada.' });
+    if (!deletedBitacora) {
+      return res.status(404).json({ error: 'Bitacora no encontrada.' });
     }
-    return res.status(200).json({ deletedCategory});
+    return res.status(200).json({ deletedBitacora});
 
   } catch (ex) {
     console.error(ex);

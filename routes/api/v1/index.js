@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const categoriesRoutes = require('./categorias');
+const usuariosRoutes = require('./usuarios');
+const categoriasRoutes = require('./categorias');
+const bitacorasRoutes = require('./Bitacora');
 
-router.use('/categories', categoriesRoutes);
+router.use('/usuarios', usuariosRoutes);
+router.use('/categories', categoriasRoutes);
+router.use('/bitacoras', bitacorasRoutes);
 
 module.exports = router;
