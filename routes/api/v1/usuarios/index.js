@@ -48,11 +48,28 @@ router.get('/byid/:codigo', async (req, res) => {
 router.post('/new', async (req, res) => {
   try {
     const {email = '',password = '',nombre = '',avatar = '',estado = ''} = req.body;
+    if (/^\s*$/.test(email)) {
+      return res.status(400).json({
+        error: 'Se espera valor de email'
+      });
+    }
     if (/^\s*$/.test(nombre)) {
       return res.status(400).json({
         error: 'Se espera valor de nombre'
       });
     }
+    if (/^\s*$/.test(password)) {
+      return res.status(400).json({
+        error: 'Se espera valor de password'
+      });
+    }
+    if (/^\s*$/.test(avatar)) {
+      return res.status(400).json({
+        error: 'Se espera valor de avatar'
+      });
+    }
+
+
     if (!(/^(ACT)|(INA)$/.test(estado))) {
       return res.status(400).json({
         error: 'Se espera valor de estado en ACT o INA'
@@ -77,9 +94,25 @@ router.put('/update/:codigo', async (req, res)=>{
       return res.status(400).json({error:'El codigo debe ser un dígito válido.'});
     }
     const {email = '',password = '',nombre = '',avatar = '',estado = ''} = req.body;
+
+    if (/^\s*$/.test(email)) {
+      return res.status(400).json({
+        error: 'Se espera valor de email'
+      });
+    }
     if (/^\s*$/.test(nombre)) {
       return res.status(400).json({
         error: 'Se espera valor de nombre'
+      });
+    }
+    if (/^\s*$/.test(password)) {
+      return res.status(400).json({
+        error: 'Se espera valor de password'
+      });
+    }
+    if (/^\s*$/.test(avatar)) {
+      return res.status(400).json({
+        error: 'Se espera valor de avatar'
       });
     }
     if (!(/^(ACT)|(INA)$/.test(estado))) {
